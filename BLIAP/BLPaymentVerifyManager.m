@@ -120,7 +120,11 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
         return [obj1.transactionDate compare:obj2.transactionDate] == NSOrderedAscending; // 日期升序排序.
         
     } forUser:self.userid error:nil];
-    return transationModels.count;
+
+    if (transationModels && transationModels.count > 0) {
+        return NO;
+    }
+    return YES;
 }
 
 - (void)cancelAllTasks {
