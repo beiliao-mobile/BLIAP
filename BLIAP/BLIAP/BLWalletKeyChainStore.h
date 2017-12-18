@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  *
  * Click https://github.com/newyjp
- * or https://juejin.im/user/5824ab9ea22b9d006709d54e to contact me.
+ * or http://www.jianshu.com/users/e2f2d779c022/latest_articles to contact me.
  */
 
 #import <UICKeyChainStore/UICKeyChainStore.h>

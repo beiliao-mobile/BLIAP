@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  *
  * Click https://github.com/newyjp
- * or https://juejin.im/user/5824ab9ea22b9d006709d54e to contact me.
+ * or http://www.jianshu.com/users/e2f2d779c022/latest_articles to contact me.
  */
 
 #import "BLPaymentVerifyTask.h"
@@ -92,11 +92,13 @@
 #pragma mark - Request
 
 - (void)sendCreateOrderRequestWithProductIdentifier:(NSString *)productIdentifier md5:(NSString *)md5 {
-#warning 创建订单请求, 需要自己实现.
+    // 发送创建订单请求.
 }
 
 - (void)sendUploadCertificateRequest {
-#warning 发送上传凭证进行验证请求, 需要自己实现.
+    // 发送上传凭证进行验证请求.
+    NSString *receipts = [self.transactionReceiptData base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+    NSString *md5 = [NSData MD5HexDigest:[receipts dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
 

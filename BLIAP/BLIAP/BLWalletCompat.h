@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  *
  * Click https://github.com/newyjp
- * or https://juejin.im/user/5824ab9ea22b9d006709d54e to contact me.
+ * or http://www.jianshu.com/users/e2f2d779c022/latest_articles to contact me.
  */
 
 #ifndef BLWalletCompat_h
@@ -15,6 +15,12 @@
 #import <UIKit/UIKit.h>
 
 static NSString *BLWalletErrorDomain = @"com.ibeiliao.wallet.error.www";
+
+// 某笔待验证交易的验证状态。
+typedef NS_ENUM(NSUInteger, BLPaymentTransactionModelState) {
+    BLPaymentTransactionModelStateDefault = 0, // 初始状态， 从未和后台验证过.
+    BLPaymentTransactionModelStateNeedRetry = 1 // 等待重试， 至少和后台验证过一次，并且未能验证当前交易的状态.
+};
 
 // 验证收到结果通知, 验证收据有效, objc 为 task 本身, 不要强持有 task 对象, task 会在使用以后释放.
 UIKIT_EXTERN NSString *const BLPaymentVerifyTaskDidReceiveResponseReceiptValidNotification;

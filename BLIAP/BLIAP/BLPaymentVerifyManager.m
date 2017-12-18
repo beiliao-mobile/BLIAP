@@ -13,8 +13,7 @@
 #import "BLWalletKeyChainStore.h"
 #import "BLPaymentTransactionModel.h"
 #import "BLPaymentVerifyTask.h"
-#import "BLWalletKeyChainStore.h"
-#import "BLWalletCompat.h"
+#import <AFNetworkReachabilityManager.h>
 
 @interface BLPaymentVerifyManager()<BLPaymentVerifyTaskDelegate>
 
@@ -45,8 +44,12 @@
 
 @end
 
-NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.payment.keychain.store.service.key.com";
+NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.payment.models.keychain.store.service.key.www";
 @implementation BLPaymentVerifyManager
+
+- (void)dealloc {
+    [self removeNotificationObserver];
+}
 
 - (instancetype)init {
     NSAssert(NO, @"请使用指定的方法初始化");
@@ -64,6 +67,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
         _userid = userid;
         _currentVerifingTask = nil;
         _keychainStore = [BLWalletKeyChainStore keyChainStoreWithService:kBLPaymentVerifyManagerKeychainStoreServiceKey];
+        [self addNotificationObserver];
     }
     return self;
 }
@@ -120,7 +124,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
         return [obj1.transactionDate compare:obj2.transactionDate] == NSOrderedAscending; // 日期升序排序.
         
     } forUser:self.userid error:nil];
-
+    
     if (transationModels && transationModels.count > 0) {
         return NO;
     }
@@ -135,19 +139,15 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     self.operationTaskQueue = nil;
 }
 
-#pragma mark - BLPaymentVerifyTaskDelegate
 
-- (void)paymentVerifyTaskRequestDidStart:(BLPaymentVerifyTask *)task {
-    if (![self inspectTask:task isCurrentVerifyTask:self.currentVerifingTask]) {
-        [self cancelAllTaskAndResetAllModelsThenStartFirstTaskIfNeed];
-    }
-}
+#pragma mark - BLPaymentVerifyTaskDelegate
 
 - (void)paymentVerifyTaskDidReceiveResponseReceiptValid:(BLPaymentVerifyTask *)task {
     if (![self inspectTask:task isCurrentVerifyTask:self.currentVerifingTask]) {
         [self cancelAllTaskAndResetAllModelsThenStartFirstTaskIfNeed];
         return;
     }
+    // [BLHUDManager showToastWithText:@"支付成功"];
     
     // 通知代理将改 transactionIdentifier 的 transaction finish 掉.
     if (self.delegate && [self.delegate respondsToSelector:@selector(paymentVerifyManager:paymentTransactionVerifyValid:)]) {
@@ -156,6 +156,10 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     
     [self removeFinishedTask:task];
     self.currentVerifingTask = nil;
+    
+    NSString *alertString = [NSString stringWithFormat:@"您已成功充值 %@ 元", task.transactionModel.priceTagString];
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:alertString message:nil delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alertView show];
     
     // 执行下一条任务.
     [self startNextTaskIfNeed];
@@ -179,7 +183,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     [self startNextTaskIfNeed];
 }
 
-- (void)paymentVerifyTaskRequestFailed:(BLPaymentVerifyTask *)task {
+- (void)paymentVerifyTaskUploadCertificateRequestFailed:(BLPaymentVerifyTask *)task{
     if (![self inspectTask:task isCurrentVerifyTask:self.currentVerifingTask]) {
         [self cancelAllTaskAndResetAllModelsThenStartFirstTaskIfNeed];
         return;
@@ -194,7 +198,103 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     [self.keychainStore bl_updatePaymentTransactionModelStateWithTransactionIdentifier:task.transactionModel.transactionIdentifier modelVerifyCount:task.transactionModel.modelVerifyCount + 1  forUser:self.userid];
     self.currentVerifingTask = nil;
     
-    // 重新执行当前任务.
+    // 执行下一条任务.
+    [self startNextTaskIfNeed];
+}
+
+- (void)paymentVerifyTaskCreateOrderRequestFailed:(BLPaymentVerifyTask *)task {
+    if (![self inspectTask:task isCurrentVerifyTask:self.currentVerifingTask]) {
+        [self cancelAllTaskAndResetAllModelsThenStartFirstTaskIfNeed];
+        return;
+    }
+    
+    self.currentVerifingTask = nil;
+    // 执行下一条任务.
+    [self startNextTaskIfNeed];
+}
+
+- (void)paymentVerifyTaskDidReceiveCreateOrderResponse:(BLPaymentVerifyTask *)task
+                                               orderNo:(NSString *)orderNo
+                                        priceTagString:(NSString *)priceTagString
+                                                   md5:(nonnull NSString *)md5 {
+    if (![self inspectTask:task isCurrentVerifyTask:self.currentVerifingTask]) {
+        [self cancelAllTaskAndResetAllModelsThenStartFirstTaskIfNeed];
+        return;
+    }
+    
+    [self.keychainStore bl_savePaymentTransactionModelWithTransactionIdentifier:task.transactionModel.transactionIdentifier
+                                                                        orderNo:orderNo
+                                                                 priceTagString:priceTagString
+                                                                            md5:md5
+                                                                        forUser:self.userid];
+    self.currentVerifingTask = nil;
+    
+    // 执行下一条任务.
+    [self startNextTaskIfNeed];
+}
+
+
+#pragma mark - UIAlertViewDelegate
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    [NSNotificationCenter.defaultCenter postNotificationName:BLPaymentUserDidClickOKAfterAlertNotification object:nil];
+}
+
+
+#pragma mark - Notification
+
+- (void)addNotificationObserver {
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(didReceiveClearAllUnfinishedTransiactionNotification) name:BLClearAllUnfinishedTransiactionNotification object:nil];
+    
+    
+}
+
+- (void)removeNotificationObserver {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)didReceiveClearAllUnfinishedTransiactionNotification {
+    if (self.userid) {
+        [self.keychainStore bl_deleteAllPaymentTransactionModelsIfNeedForUser:self.userid];
+    }
+}
+
+
+#pragma mark - NetworkReachability
+
+- (void)networkReachabilityByAFN {
+    __weak typeof(self) wself = self;
+    [AFNetworkReachabilityManager.sharedManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        
+        __strong typeof(wself) sself = wself;
+        if (!wself) return;
+        switch (status) {
+            case AFNetworkReachabilityStatusUnknown:
+                NSLog(@"未知");
+                break;
+                
+            case AFNetworkReachabilityStatusNotReachable:
+                NSLog(@"没有网络");
+                break;
+                
+            case AFNetworkReachabilityStatusReachableViaWWAN:
+                [self networkEnable];
+                break;
+                
+            case AFNetworkReachabilityStatusReachableViaWiFi:
+                [self networkEnable];
+                break;
+                
+            default:
+                break;
+        }
+    }];
+    
+    [AFNetworkReachabilityManager.sharedManager startMonitoring];
+}
+
+- (void)networkEnable {
+    // 执行下一条任务.
     [self startNextTaskIfNeed];
 }
 
@@ -215,6 +315,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
 - (void)removeFinishedTask:(BLPaymentVerifyTask *)task {
     // 验证有结果, 将该条凭证数据从 keychain 里面删除掉.
     [self.keychainStore bl_deletePaymentTransactionModelWithTransactionIdentifier:task.transactionModel.transactionIdentifier forUser:self.userid];
+    NSLog(@"订单验证成功后删除 keychain 数据成功");
     // 将当前任务从队列中移除掉.
     [self.operationTaskQueue removeObject:task];
 }
@@ -254,12 +355,23 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
         return;
     }
     
+    // 网络检查, 避免没有网络的情况下页一直发送验证请求.
+    AFNetworkReachabilityStatus networkReachabilityStatus = AFNetworkReachabilityManager.sharedManager.networkReachabilityStatus;
+    BOOL isNetworkEnable = networkReachabilityStatus == AFNetworkReachabilityStatusReachableViaWWAN || networkReachabilityStatus ==  AFNetworkReachabilityStatusReachableViaWiFi;
+    if (!isNetworkEnable) {
+        return;
+    }
+    
     // 步长设定.
     // 只要是已经和后台验证过并且失败过的交易, 两次请求之间的时间间隔是失败的次数 * BLPaymentVerifyUploadReceiptDataIntervalDelta.
     __weak typeof(self) wself = self;
     self.currentVerifingTask = self.operationTaskQueue.firstObject;
     if (self.currentVerifingTask.transactionModel.modelVerifyCount > 0) { // 说明是重新验证.
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.currentVerifingTask.transactionModel.modelVerifyCount * BLPaymentVerifyUploadReceiptDataIntervalDelta * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        NSTimeInterval intervalDelta = self.currentVerifingTask.transactionModel.modelVerifyCount * BLPaymentVerifyUploadReceiptDataIntervalDelta;
+        if (intervalDelta > BLPaymentVerifyUploadReceiptDataMaxIntervalDelta) {
+            intervalDelta = BLPaymentVerifyUploadReceiptDataMaxIntervalDelta;
+        }
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(intervalDelta * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             
             __strong typeof(wself) sself = wself;
             if (!sself) return;
@@ -270,6 +382,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     else {
         [self.currentVerifingTask start];
     }
+    
 }
 
 - (void)resetAllIfNeed {

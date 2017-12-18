@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		482D78711FE2144700D3AFBA /* BLPaymentManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 482D78621FE2144700D3AFBA /* BLPaymentManager.m */; };
-		482D78721FE2144700D3AFBA /* BLPaymentTransactionModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 482D78641FE2144700D3AFBA /* BLPaymentTransactionModel.m */; };
-		482D78731FE2144700D3AFBA /* BLPaymentVerifyManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 482D78661FE2144700D3AFBA /* BLPaymentVerifyManager.m */; };
-		482D78741FE2144700D3AFBA /* BLPaymentVerifyTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 482D78681FE2144700D3AFBA /* BLPaymentVerifyTask.m */; };
-		482D78761FE2144700D3AFBA /* BLWalletCompat.m in Sources */ = {isa = PBXBuildFile; fileRef = 482D786C1FE2144700D3AFBA /* BLWalletCompat.m */; };
-		482D78771FE2144700D3AFBA /* BLWalletKeyChainStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 482D786F1FE2144700D3AFBA /* BLWalletKeyChainStore.m */; };
+		4819AFA71FE75CEC002056F0 /* BLPaymentManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4819AF981FE75CEB002056F0 /* BLPaymentManager.m */; };
+		4819AFA91FE75CEC002056F0 /* BLPaymentVerifyManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4819AFA01FE75CEC002056F0 /* BLPaymentVerifyManager.m */; };
+		4819AFAA1FE75CEC002056F0 /* BLWalletCompat.m in Sources */ = {isa = PBXBuildFile; fileRef = 4819AFA11FE75CEC002056F0 /* BLWalletCompat.m */; };
+		4819AFAB1FE75CEC002056F0 /* BLWalletKeyChainStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 4819AFA21FE75CEC002056F0 /* BLWalletKeyChainStore.m */; };
+		4819AFAC1FE75CEC002056F0 /* BLPaymentTransactionModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 4819AFA41FE75CEC002056F0 /* BLPaymentTransactionModel.m */; };
+		4819AFAD1FE75CEC002056F0 /* BLPaymentVerifyTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 4819AFA51FE75CEC002056F0 /* BLPaymentVerifyTask.m */; };
 		482D78781FE2144700D3AFBA /* receipt.txt in Resources */ = {isa = PBXBuildFile; fileRef = 482D78701FE2144700D3AFBA /* receipt.txt */; };
 		482D789E1FE2193100D3AFBA /* BLJailbreakDetectTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 482D789C1FE2193100D3AFBA /* BLJailbreakDetectTool.m */; };
 		482D78A11FE2339100D3AFBA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 482D789F1FE2339100D3AFBA /* AppDelegate.m */; };
@@ -24,18 +24,19 @@
 /* Begin PBXFileReference section */
 		0FC7590763276779A5F3693E /* libPods-BLIAP.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BLIAP.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4542B888FAE6F6528B5A8DD0 /* Pods-BLIAP.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BLIAP.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BLIAP/Pods-BLIAP.debug.xcconfig"; sourceTree = "<group>"; };
-		482D78611FE2144700D3AFBA /* BLPaymentManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLPaymentManager.h; sourceTree = "<group>"; };
-		482D78621FE2144700D3AFBA /* BLPaymentManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLPaymentManager.m; sourceTree = "<group>"; };
-		482D78631FE2144700D3AFBA /* BLPaymentTransactionModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLPaymentTransactionModel.h; sourceTree = "<group>"; };
-		482D78641FE2144700D3AFBA /* BLPaymentTransactionModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLPaymentTransactionModel.m; sourceTree = "<group>"; };
-		482D78651FE2144700D3AFBA /* BLPaymentVerifyManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLPaymentVerifyManager.h; sourceTree = "<group>"; };
-		482D78661FE2144700D3AFBA /* BLPaymentVerifyManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLPaymentVerifyManager.m; sourceTree = "<group>"; };
-		482D78671FE2144700D3AFBA /* BLPaymentVerifyTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLPaymentVerifyTask.h; sourceTree = "<group>"; };
-		482D78681FE2144700D3AFBA /* BLPaymentVerifyTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLPaymentVerifyTask.m; sourceTree = "<group>"; };
-		482D786B1FE2144700D3AFBA /* BLWalletCompat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLWalletCompat.h; sourceTree = "<group>"; };
-		482D786C1FE2144700D3AFBA /* BLWalletCompat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLWalletCompat.m; sourceTree = "<group>"; };
-		482D786E1FE2144700D3AFBA /* BLWalletKeyChainStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLWalletKeyChainStore.h; sourceTree = "<group>"; };
-		482D786F1FE2144700D3AFBA /* BLWalletKeyChainStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLWalletKeyChainStore.m; sourceTree = "<group>"; };
+		4819AF981FE75CEB002056F0 /* BLPaymentManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLPaymentManager.m; sourceTree = "<group>"; };
+		4819AF991FE75CEB002056F0 /* BLWalletInjecting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLWalletInjecting.h; sourceTree = "<group>"; };
+		4819AF9A1FE75CEC002056F0 /* BLPaymentManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLPaymentManager.h; sourceTree = "<group>"; };
+		4819AF9C1FE75CEC002056F0 /* BLWalletCompat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLWalletCompat.h; sourceTree = "<group>"; };
+		4819AF9D1FE75CEC002056F0 /* BLWalletKeyChainStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLWalletKeyChainStore.h; sourceTree = "<group>"; };
+		4819AF9F1FE75CEC002056F0 /* BLPaymentVerifyManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLPaymentVerifyManager.h; sourceTree = "<group>"; };
+		4819AFA01FE75CEC002056F0 /* BLPaymentVerifyManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLPaymentVerifyManager.m; sourceTree = "<group>"; };
+		4819AFA11FE75CEC002056F0 /* BLWalletCompat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLWalletCompat.m; sourceTree = "<group>"; };
+		4819AFA21FE75CEC002056F0 /* BLWalletKeyChainStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLWalletKeyChainStore.m; sourceTree = "<group>"; };
+		4819AFA31FE75CEC002056F0 /* BLPaymentTransactionModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLPaymentTransactionModel.h; sourceTree = "<group>"; };
+		4819AFA41FE75CEC002056F0 /* BLPaymentTransactionModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLPaymentTransactionModel.m; sourceTree = "<group>"; };
+		4819AFA51FE75CEC002056F0 /* BLPaymentVerifyTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLPaymentVerifyTask.m; sourceTree = "<group>"; };
+		4819AFA61FE75CEC002056F0 /* BLPaymentVerifyTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLPaymentVerifyTask.h; sourceTree = "<group>"; };
 		482D78701FE2144700D3AFBA /* receipt.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = receipt.txt; sourceTree = "<group>"; };
 		482D789C1FE2193100D3AFBA /* BLJailbreakDetectTool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLJailbreakDetectTool.m; sourceTree = "<group>"; };
 		482D789D1FE2193100D3AFBA /* BLJailbreakDetectTool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLJailbreakDetectTool.h; sourceTree = "<group>"; };
@@ -63,20 +64,21 @@
 		482D78601FE2144700D3AFBA /* BLIAP */ = {
 			isa = PBXGroup;
 			children = (
+				4819AF9A1FE75CEC002056F0 /* BLPaymentManager.h */,
+				4819AF981FE75CEB002056F0 /* BLPaymentManager.m */,
+				4819AFA31FE75CEC002056F0 /* BLPaymentTransactionModel.h */,
+				4819AFA41FE75CEC002056F0 /* BLPaymentTransactionModel.m */,
+				4819AF9F1FE75CEC002056F0 /* BLPaymentVerifyManager.h */,
+				4819AFA01FE75CEC002056F0 /* BLPaymentVerifyManager.m */,
+				4819AFA61FE75CEC002056F0 /* BLPaymentVerifyTask.h */,
+				4819AFA51FE75CEC002056F0 /* BLPaymentVerifyTask.m */,
+				4819AF9C1FE75CEC002056F0 /* BLWalletCompat.h */,
+				4819AFA11FE75CEC002056F0 /* BLWalletCompat.m */,
+				4819AF991FE75CEB002056F0 /* BLWalletInjecting.h */,
+				4819AF9D1FE75CEC002056F0 /* BLWalletKeyChainStore.h */,
+				4819AFA21FE75CEC002056F0 /* BLWalletKeyChainStore.m */,
 				482D789D1FE2193100D3AFBA /* BLJailbreakDetectTool.h */,
 				482D789C1FE2193100D3AFBA /* BLJailbreakDetectTool.m */,
-				482D78611FE2144700D3AFBA /* BLPaymentManager.h */,
-				482D78621FE2144700D3AFBA /* BLPaymentManager.m */,
-				482D78631FE2144700D3AFBA /* BLPaymentTransactionModel.h */,
-				482D78641FE2144700D3AFBA /* BLPaymentTransactionModel.m */,
-				482D78651FE2144700D3AFBA /* BLPaymentVerifyManager.h */,
-				482D78661FE2144700D3AFBA /* BLPaymentVerifyManager.m */,
-				482D78671FE2144700D3AFBA /* BLPaymentVerifyTask.h */,
-				482D78681FE2144700D3AFBA /* BLPaymentVerifyTask.m */,
-				482D786B1FE2144700D3AFBA /* BLWalletCompat.h */,
-				482D786C1FE2144700D3AFBA /* BLWalletCompat.m */,
-				482D786E1FE2144700D3AFBA /* BLWalletKeyChainStore.h */,
-				482D786F1FE2144700D3AFBA /* BLWalletKeyChainStore.m */,
 				482D78701FE2144700D3AFBA /* receipt.txt */,
 			);
 			path = BLIAP;
@@ -257,15 +259,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				482D78711FE2144700D3AFBA /* BLPaymentManager.m in Sources */,
-				482D78721FE2144700D3AFBA /* BLPaymentTransactionModel.m in Sources */,
+				4819AFAD1FE75CEC002056F0 /* BLPaymentVerifyTask.m in Sources */,
+				4819AFA71FE75CEC002056F0 /* BLPaymentManager.m in Sources */,
 				482D78A11FE2339100D3AFBA /* AppDelegate.m in Sources */,
-				482D78731FE2144700D3AFBA /* BLPaymentVerifyManager.m in Sources */,
+				4819AFAB1FE75CEC002056F0 /* BLWalletKeyChainStore.m in Sources */,
+				4819AFAC1FE75CEC002056F0 /* BLPaymentTransactionModel.m in Sources */,
+				4819AFAA1FE75CEC002056F0 /* BLWalletCompat.m in Sources */,
+				4819AFA91FE75CEC002056F0 /* BLPaymentVerifyManager.m in Sources */,
 				482D789E1FE2193100D3AFBA /* BLJailbreakDetectTool.m in Sources */,
 				4847A4981FDE3F930003B38D /* main.m in Sources */,
-				482D78741FE2144700D3AFBA /* BLPaymentVerifyTask.m in Sources */,
-				482D78761FE2144700D3AFBA /* BLWalletCompat.m in Sources */,
-				482D78771FE2144700D3AFBA /* BLWalletKeyChainStore.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

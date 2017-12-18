@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  *
  * Click https://github.com/newyjp
- * or https://juejin.im/user/5824ab9ea22b9d006709d54e to contact me.
+ * or http://www.jianshu.com/users/e2f2d779c022/latest_articles to contact me.
  */
 
 #import "BLPaymentManager.h"
@@ -51,8 +51,6 @@ NSString *const kBLPaymentManagerKeychainStoreServiceKey = @"com.ibeiliao.paymen
     [[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
     self.fetchProductCompletion = nil;
     [self removeNotificationObserver];
-    [self.verifyManager cancelAllTasks];
-    self.verifyManager = nil;
 }
 
 
@@ -84,7 +82,6 @@ static BLPaymentManager *_sharedManager = nil;
         [self.currentProductRequest cancel];
         self.currentProductRequest = nil;
     }
-    [self.verifyManager cancelAllTasks];
     self.verifyManager = nil;
     self.fetchProductCompletion = nil;
     [[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
@@ -133,11 +130,9 @@ static BLPaymentManager *_sharedManager = nil;
         return;
     }
     
-    // 取消之前的请求.
     if (self.currentProductRequest) {
         [self.currentProductRequest cancel];
         self.currentProductRequest = nil;
-        self.fetchProductCompletion = nil;
     }
     self.fetchProductCompletion = completion;
     
@@ -244,8 +239,9 @@ static BLPaymentManager *_sharedManager = nil;
         [self.verifyManager refreshTransactionReceiptData:transactionReceiptData];
     }
     else {
+        BLPaymentTransactionModel *transactionModel = [self generateTransactionModelWithPaymentTransaction:transaction];
         // 报告错误
-        NSError *error = [NSError errorWithDomain:BLWalletErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : [self generateErrorStringForTransaction:transaction]}];
+        NSError *error = [NSError errorWithDomain:BLWalletErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"%@", transactionModel]}];
          // [BLAssert reportError:error];
     }
 
