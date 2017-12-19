@@ -2,7 +2,7 @@
 
 处理了 IAP 九大坑, 并且封装了收据验证队列, 最大限度保证 IAP 安全的示例代码.
 
-## 模块划分如下;
+## 模块划分如下:
 
 ![](http://upload-images.jianshu.io/upload_images/2122663-f53a3ddd98eda000.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
