@@ -43,17 +43,6 @@
 NSString *const kBLPaymentManagerKeychainStoreServiceKey = @"com.ibeiliao.payment.attachment.keychain.store.service.key.www";
 @implementation BLPaymentManager
 
-- (void)dealloc {
-    if ([self currentDeviceIsJailbroken]) {
-        return;
-    }
-    
-    [[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
-    self.fetchProductCompletion = nil;
-    [self removeNotificationObserver];
-}
-
-
 #pragma mark - Public
 
 static BLPaymentManager *_sharedManager = nil;
@@ -244,6 +233,12 @@ static BLPaymentManager *_sharedManager = nil;
         NSError *error = [NSError errorWithDomain:BLWalletErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"%@", transactionModel]}];
          // [BLAssert reportError:error];
     }
+    
+    // 已经在之前验证成功, 但是当验证成功回来从 IAP 取当前这个订单的时候, 取不到, 现在直接将这样的订单关闭掉.
+    if ([self checkTransactionDidFinishedFromService:transaction]) {
+        [self finishATransation:transaction];
+        return;
+    }
 
     [self pushPaymentTransactionIntoOperationTaskQueueIfNeed:transaction];
 }
@@ -297,6 +292,8 @@ static BLPaymentManager *_sharedManager = nil;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillEnterForegroundNotification:) name:UIApplicationWillEnterForegroundNotification object:nil];
     
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(didReceiveClearAllUnfinishedTransiactionNotification) name:BLClearAllUnfinishedTransiactionNotification object:nil];
+    
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(didReceiveApplicationWillTerminateNotification) name:UIApplicationWillTerminateNotification object:nil];
 }
 
 - (void)removeNotificationObserver {
@@ -316,8 +313,28 @@ static BLPaymentManager *_sharedManager = nil;
     }
 }
 
+- (void)didReceiveApplicationWillTerminateNotification {
+    if ([self currentDeviceIsJailbroken]) {
+        return;
+    }
+    
+    [[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
+    self.fetchProductCompletion = nil;
+    [self removeNotificationObserver];
+    _sharedManager = nil;
+}
+
 
 #pragma mark - Private
+
+- (BOOL)checkTransactionDidFinishedFromService:(SKPaymentTransaction *)transaction {
+    NSParameterAssert(transaction);
+    if (!transaction) {
+        return NO;
+    }
+    
+    return [self.verifyManager paymentTransactionDidFinishFromServiceAndDeleteWhenExisted:transaction];
+}
 
 - (void)checkUnfinishedTransactionInSandbox {
     // 未完成的列表.
@@ -328,6 +345,13 @@ static BLPaymentManager *_sharedManager = nil;
             [self finishATransation:transaction];
             continue;
         }
+        
+        // 已经在之前验证成功, 但是当验证成功回来从 IAP 取当前这个订单的时候, 取不到, 现在直接将这样的订单关闭掉.
+        if ([self checkTransactionDidFinishedFromService:transaction]) {
+            [self finishATransation:transaction];
+            return;
+        }
+        
         [self pushPaymentTransactionIntoOperationTaskQueueIfNeed:transaction];
     }
     
@@ -366,7 +390,20 @@ static BLPaymentManager *_sharedManager = nil;
         }
     }
     
-    [self finishATransation:targetTransaction];
+    // 可能会出现明明有未成功的交易, 但是 transactionsWaitingForVerifing 就是没有值.
+    // 此时应该将这笔已经完成的订单状态存起来, 等待之后苹果返回这笔订单的时候在进行处理.
+    if (!targetTransaction) {
+#if FB_TWEAK_ENABLED
+#else
+        NSString *errorString = [NSString stringWithFormat:@"天啦噜❌, 又出现订单在后台验证成功, 但是从 IAP 的未完成订单里取不到这比交易的错误 transactionIdentifier: %@", transactionIdentifier];
+        NSError *error = [NSError errorWithDomain:BLWalletErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : errorString}];
+        // [BLAssert reportError:error];
+#endif
+        [self.verifyManager updatePaymentTransactionModelStateWithTransactionIdentifier:transactionIdentifier];
+    }
+    else {
+        [self finishATransation:targetTransaction];
+    }
 }
 
 - (void)finishATransation:(SKPaymentTransaction *)transaction {
@@ -385,12 +422,12 @@ static BLPaymentManager *_sharedManager = nil;
 
 // 压入队列的会触发自动验证请求 ✅.
 - (void)pushPaymentTransactionIntoOperationTaskQueueIfNeed:(SKPaymentTransaction *)transaction {
-    // 还没有持久化到验证队列里.
     if ([self.verifyManager transactionDidStoreInKeyChainWithTransactionIdentifier:transaction.transactionIdentifier]) {
         NSLog(@"当前交易已经持久化到了 keychain 中");
         return;
     }
     
+    // 还没有持久化到验证队列里.
     BLPaymentTransactionModel *transactionModel = [self generateTransactionModelWithPaymentTransaction:transaction];
     [self.verifyManager appendPaymentTransactionModel:transactionModel];
 }

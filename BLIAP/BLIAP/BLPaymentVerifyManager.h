@@ -11,7 +11,7 @@
 
 #import <UIKit/UIKit.h>
 
-@class BLPaymentVerifyManager, BLPaymentVerifyTask, BLPaymentTransactionModel;
+@class BLPaymentVerifyManager, BLPaymentVerifyTask, BLPaymentTransactionModel, SKPaymentTransaction;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -97,6 +97,18 @@ NS_ASSUME_NONNULL_BEGIN
  * 取消所有的待验证队列的执行.
  */
 - (void)cancelAllTasks;
+
+/*
+* 改变某笔交易的验证状态.
+*
+* @param transactionIdentifier         交易模型唯一标识.
+*/
+- (void)updatePaymentTransactionModelStateWithTransactionIdentifier:(NSString *)transactionIdentifier;
+
+/**
+ * 某笔交易是否在之前已经和后台验证完成, 如果是就删掉这笔交易.
+ */
+- (BOOL)paymentTransactionDidFinishFromServiceAndDeleteWhenExisted:(SKPaymentTransaction *)transaction;
 
 @end
 

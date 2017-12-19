@@ -14,6 +14,7 @@
 #import "BLPaymentTransactionModel.h"
 #import "BLPaymentVerifyTask.h"
 #import <AFNetworkReachabilityManager.h>
+#import <StoreKit/StoreKit.h>
 
 @interface BLPaymentVerifyManager()<BLPaymentVerifyTaskDelegate>
 
@@ -42,6 +43,11 @@
  */
 @property(nonatomic, copy) NSString *userid;
 
+/**
+ * 网络监听者.
+ */
+@property(nonatomic, strong, nonnull) AFNetworkReachabilityManager *networkReachabilityManager;
+
 @end
 
 NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.payment.models.keychain.store.service.key.www";
@@ -68,6 +74,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
         _currentVerifingTask = nil;
         _keychainStore = [BLWalletKeyChainStore keyChainStoreWithService:kBLPaymentVerifyManagerKeychainStoreServiceKey];
         [self addNotificationObserver];
+        [self networkReachabilityByAFN];
     }
     return self;
 }
@@ -76,7 +83,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
 #pragma mark - Public
 
 - (void)startPaymentTransactionVerifingIfNeed {
-    [self internalStartPaymentTransactionVerifing];
+    // 这里不需要处理, 因为我们使用 AFN 监听了网络状态, 所以等待 AFN 的网络状态回调才开始请求.
 }
 
 - (void)refreshTransactionReceiptData:(NSData *)transactionReceiptData {
@@ -139,6 +146,41 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     self.operationTaskQueue = nil;
 }
 
+- (void)updatePaymentTransactionModelStateWithTransactionIdentifier:(NSString *)transactionIdentifier {
+    NSParameterAssert(transactionIdentifier );
+    if (!transactionIdentifier.length) {
+        return;
+    }
+    
+    [self.keychainStore bl_updatePaymentTransactionModelStateWithTransactionIdentifier:transactionIdentifier isTransactionValidFromService:YES forUser:self.userid];
+}
+
+- (BOOL)paymentTransactionDidFinishFromServiceAndDeleteWhenExisted:(SKPaymentTransaction *)transaction {
+    NSParameterAssert(transaction);
+    if (!transaction) {
+        return NO;
+    }
+    
+    NSArray<BLPaymentTransactionModel *> *models = [self.keychainStore bl_fetchAllPaymentTransactionModelsForUser:self.userid error:nil];
+    if (!models.count) {
+        return NO;
+    }
+    
+    for (BLPaymentTransactionModel *model in models) {
+        if (model.isTransactionValidFromService && [model.transactionIdentifier isEqualToString:transaction.transactionIdentifier]) {
+            [self.keychainStore bl_deletePaymentTransactionModelWithTransactionIdentifier:transaction.transactionIdentifier forUser:self.userid];
+#if FB_TWEAK_ENABLED
+#else
+            NSString *errorString = [NSString stringWithFormat:@"出现订单在后台验证成功, 但是从 IAP 的未完成订单里取不到这比交易的错误 transactionIdentifier: %@, 但是后来苹果返回了这笔订单, 已经将这个交易从 keychain 中删除了", transaction.transactionIdentifier];
+            NSError *error = [NSError errorWithDomain:BLWalletErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : errorString}];
+            // [BLAssert reportError:error];
+#endif
+            return YES;
+        }
+    }
+    return NO;
+}
+
 
 #pragma mark - BLPaymentVerifyTaskDelegate
 
@@ -195,7 +237,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     }
     
     // 给已经验证过一次的失败的交易打上等待重新验证的标识.
-    [self.keychainStore bl_updatePaymentTransactionModelStateWithTransactionIdentifier:task.transactionModel.transactionIdentifier modelVerifyCount:task.transactionModel.modelVerifyCount + 1  forUser:self.userid];
+    [self.keychainStore bl_updatePaymentModelVerifyCountWithTransactionIdentifier:task.transactionModel.transactionIdentifier modelVerifyCount:task.transactionModel.modelVerifyCount + 1  forUser:self.userid];
     self.currentVerifingTask = nil;
     
     // 执行下一条任务.
@@ -264,10 +306,11 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
 
 - (void)networkReachabilityByAFN {
     __weak typeof(self) wself = self;
-    [AFNetworkReachabilityManager.sharedManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+    self.networkReachabilityManager = [AFNetworkReachabilityManager manager];
+    [self.networkReachabilityManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
         
         __strong typeof(wself) sself = wself;
-        if (!wself) return;
+        if (!sself) return;
         switch (status) {
             case AFNetworkReachabilityStatusUnknown:
                 NSLog(@"未知");
@@ -278,11 +321,11 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
                 break;
                 
             case AFNetworkReachabilityStatusReachableViaWWAN:
-                [self networkEnable];
+                [sself networkEnable];
                 break;
                 
             case AFNetworkReachabilityStatusReachableViaWiFi:
-                [self networkEnable];
+                [sself networkEnable];
                 break;
                 
             default:
@@ -290,7 +333,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
         }
     }];
     
-    [AFNetworkReachabilityManager.sharedManager startMonitoring];
+    [self.networkReachabilityManager startMonitoring];
 }
 
 - (void)networkEnable {
@@ -406,17 +449,30 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     NSError *error = nil;
     // 所有还未得到验证的交易(持久化的).
     NSArray<BLPaymentTransactionModel *> *transationModels = [self.keychainStore bl_fetchAllPaymentTransactionModelsForUser:self.userid error:&error];
-    
     if (error) {
         NSLog(@"%@", error);
         return;
     }
-    if (!transationModels.count) {
+    
+    NSMutableArray<BLPaymentTransactionModel *> *transationModelsM = [transationModels mutableCopy];
+    // 剔除已经验证完成的交易.
+    NSMutableArray<NSNumber *> *indexM = [NSMutableArray array];
+    for (BLPaymentTransactionModel *model in transationModels) {
+        if (model.isTransactionValidFromService) {
+            [indexM addObject:@([transationModels indexOfObject:model])];
+        }
+    }
+    if (indexM.count) {
+        for (NSNumber *index in indexM) {
+            [transationModelsM removeObjectAtIndex:index.integerValue];
+        }
+    }
+    if (!transationModelsM.count) {
         return;
     }
     
     // 动态规划当前应该验证哪一笔订单.
-    NSArray<BLPaymentTransactionModel *> *transationModelsVerifyNow = [self dynamicPlanNeedVerifyModelsWithAllModels:transationModels];
+    NSArray<BLPaymentTransactionModel *> *transationModelsVerifyNow = [self dynamicPlanNeedVerifyModelsWithAllModels:transationModelsM];
     
     NSParameterAssert(self.transactionReceiptData.length);
     NSMutableArray<BLPaymentVerifyTask *> *tasksM = [NSMutableArray arrayWithCapacity:transationModelsVerifyNow.count];

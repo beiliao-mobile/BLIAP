@@ -92,7 +92,7 @@
 #pragma mark - Request
 
 - (void)sendCreateOrderRequestWithProductIdentifier:(NSString *)productIdentifier md5:(NSString *)md5 {
-    // 发送创建订单请求.
+    // 执行创建订单请求.
 }
 
 - (void)sendUploadCertificateRequest {

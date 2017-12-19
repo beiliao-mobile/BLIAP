@@ -74,7 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param modelVerifyCount      交易验证次数.
  * @param userid                用户 id.
  */
-- (void)bl_updatePaymentTransactionModelStateWithTransactionIdentifier:(NSString *)transactionIdentifier
+- (void)bl_updatePaymentModelVerifyCountWithTransactionIdentifier:(NSString *)transactionIdentifier
                                                       modelVerifyCount:(NSUInteger)modelVerifyCount
                                                                forUser:(NSString *)userid;
 
@@ -92,6 +92,17 @@ NS_ASSUME_NONNULL_BEGIN
                                                  priceTagString:(NSString *)priceTagString
                                                             md5:(NSString *)md5
                                                         forUser:(NSString *)userid;
+
+/**
+ * 改变某笔交易的验证状态.
+ *
+ * @param transactionIdentifier         交易模型唯一标识.
+ * @param isTransactionValidFromService 交易是否已经和后台验证过.
+ * @param userid                        用户 id.
+ */
+- (void)bl_updatePaymentTransactionModelStateWithTransactionIdentifier:(NSString *)transactionIdentifier
+                                                      isTransactionValidFromService:(NSUInteger)isTransactionValidFromService
+                                                               forUser:(NSString *)userid;
 
 @end
 

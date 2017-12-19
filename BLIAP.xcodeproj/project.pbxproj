@@ -25,7 +25,6 @@
 		0FC7590763276779A5F3693E /* libPods-BLIAP.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BLIAP.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4542B888FAE6F6528B5A8DD0 /* Pods-BLIAP.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BLIAP.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BLIAP/Pods-BLIAP.debug.xcconfig"; sourceTree = "<group>"; };
 		4819AF981FE75CEB002056F0 /* BLPaymentManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLPaymentManager.m; sourceTree = "<group>"; };
-		4819AF991FE75CEB002056F0 /* BLWalletInjecting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLWalletInjecting.h; sourceTree = "<group>"; };
 		4819AF9A1FE75CEC002056F0 /* BLPaymentManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLPaymentManager.h; sourceTree = "<group>"; };
 		4819AF9C1FE75CEC002056F0 /* BLWalletCompat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLWalletCompat.h; sourceTree = "<group>"; };
 		4819AF9D1FE75CEC002056F0 /* BLWalletKeyChainStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLWalletKeyChainStore.h; sourceTree = "<group>"; };
@@ -74,7 +73,6 @@
 				4819AFA51FE75CEC002056F0 /* BLPaymentVerifyTask.m */,
 				4819AF9C1FE75CEC002056F0 /* BLWalletCompat.h */,
 				4819AFA11FE75CEC002056F0 /* BLWalletCompat.m */,
-				4819AF991FE75CEB002056F0 /* BLWalletInjecting.h */,
 				4819AF9D1FE75CEC002056F0 /* BLWalletKeyChainStore.h */,
 				4819AFA21FE75CEC002056F0 /* BLWalletKeyChainStore.m */,
 				482D789D1FE2193100D3AFBA /* BLJailbreakDetectTool.h */,

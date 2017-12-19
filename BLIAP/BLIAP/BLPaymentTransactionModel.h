@@ -55,6 +55,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property(nonatomic, assign) NSUInteger modelVerifyCount;
 
+/**
+ * 是否已经在后台验证过并且有了结果(成功或者失败).
+ *
+ * @warning: 1. 确实会出现明明有未成功的交易, 但是在苹果的未完成交易列表里取不到. 此时应该将这笔订单的状态更改过来.
+ *           2. 这个值默认是 NO, 代表没有在后台验证过, 直到在后台验证过, 然后去 IAP 未完成交易列表中取值的取不到这笔订单的时候才会将订单的状态改为 YES.
+ *           3. 对于验证有结果并且能在 IAP 的未完成交易中取到值得交易, 直接就会从 keychain 中删除.
+ */
+@property(nonatomic, assign) BOOL isTransactionValidFromService;
+
 #pragma mark - Method
 
 /**

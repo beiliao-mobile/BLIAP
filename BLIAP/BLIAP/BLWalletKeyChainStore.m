@@ -113,6 +113,8 @@ static NSString *const kBLWalletModelsKeyChainStore = @"com.wallet.models.keycha
     // 存入 keychain.
     [self internalSaveModelsData:modelsDataSetM.copy forUser:userid];
     
+    // 可靠性检查.
+    [self internalCheckModelsDeleteResultWithTransactionIdentifier:transactionIdentifier userid:userid];
     pthread_mutex_unlock(&_lock);
     
     return YES;
@@ -231,7 +233,7 @@ static NSString *const kBLWalletModelsKeyChainStore = @"com.wallet.models.keycha
     return models;
 }
 
-- (void)bl_updatePaymentTransactionModelStateWithTransactionIdentifier:(NSString *)transactionIdentifier
+- (void)bl_updatePaymentModelVerifyCountWithTransactionIdentifier:(NSString *)transactionIdentifier
                                                       modelVerifyCount:(NSUInteger)modelVerifyCount
                                                                forUser:(nonnull NSString *)userid {
     NSParameterAssert(transactionIdentifier);
@@ -322,6 +324,48 @@ static NSString *const kBLWalletModelsKeyChainStore = @"com.wallet.models.keycha
     pthread_mutex_unlock(&_lock);
 }
 
+- (void)bl_updatePaymentTransactionModelStateWithTransactionIdentifier:(NSString *)transactionIdentifier
+                                         isTransactionValidFromService:(NSUInteger)isTransactionValidFromService
+                                                               forUser:(NSString *)userid {
+    NSParameterAssert(transactionIdentifier);
+    NSParameterAssert(userid);
+    
+    if (!transactionIdentifier || !userid) {
+        return;
+    }
+    
+    NSMutableArray<BLPaymentTransactionModel *> * modelsM = [self bl_fetchAllPaymentTransactionModelsForUser:userid error:nil].mutableCopy;
+    if (!modelsM.count) {
+        return;
+    }
+    
+    __block NSInteger index = -100;
+    [modelsM enumerateObjectsUsingBlock:^(BLPaymentTransactionModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        if ([obj.transactionIdentifier isEqualToString:transactionIdentifier]) {
+            index = idx;
+            *stop = YES;
+        }
+        
+    }];
+    
+    if (index < 0) {
+        NSLog(@"%@", [NSString stringWithFormat:@"keychain 不存在 transactionIdentifier 为: %@ 的数据.", transactionIdentifier]);
+        return;
+    }
+    
+    pthread_mutex_lock(&_lock);
+    modelsM[index].isTransactionValidFromService = isTransactionValidFromService;
+    
+    // 将 models 归档.
+    NSMutableSet<NSData *> *modelsDataSetM = [NSMutableSet setWithArray:[self internalEncodeModels:modelsM]];
+    
+    // 存入 keychain.
+    [self internalSaveModelsData:modelsDataSetM.copy forUser:userid];
+    
+    pthread_mutex_unlock(&_lock);
+}
+
 
 #pragma mark - Private
 
@@ -380,6 +424,31 @@ static NSString *const kBLWalletModelsKeyChainStore = @"com.wallet.models.keycha
             NSError *error = [NSError errorWithDomain:BLWalletErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"存储模型到 keychain 存完以后, keychain 里没有 %@", model]}];
              // [BLAssert reportError:error];
         }
+    }
+}
+
+
+- (void)internalCheckModelsDeleteResultWithTransactionIdentifier:(NSString *)transactionIdentifier userid:(NSString *)userid {
+    NSParameterAssert(transactionIdentifier);
+    if (!transactionIdentifier.length) {
+        return;
+    }
+    
+    NSArray<BLPaymentTransactionModel *> *modelsExisted = [self bl_fetchAllPaymentTransactionModelsForUser:userid error:nil];
+    if (!modelsExisted) {
+        return;
+    }
+    
+    BOOL contained = NO;
+    for (BLPaymentTransactionModel *existedModel in modelsExisted) {
+        if ([existedModel.transactionIdentifier isEqualToString:transactionIdentifier]) {
+            contained = YES;
+        }
+    }
+    if (!contained) {
+        // 报告错误.
+        NSError *error = [NSError errorWithDomain:BLWalletErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"删除 keychain 里的数据以后, keychain 还有这个数据 %@", transactionIdentifier]}];
+        // [BLAssert reportError:error];
     }
 }
 

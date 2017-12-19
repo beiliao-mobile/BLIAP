@@ -19,7 +19,7 @@ NSUInteger const kBLPaymentTransactionModelVerifyWarningCount = 20; // 最多验
     NSDateFormatter *formatter = [NSDateFormatter new];
     formatter.dateFormat = @"yyyy-MM-dd hh:mm:ss";
     NSString *dateString = [formatter stringFromDate:self.transactionDate];
-    return [NSString stringWithFormat:@"productIdentifier: %@, transactionIdentifier: %@, transactionDate: %@, orderNo:%@, modelVerifyCount:%ld, priceTagString: %@, md5: %@", self.productIdentifier, self.transactionIdentifier, dateString, self.orderNo, self.modelVerifyCount, self.priceTagString, self.md5];
+    return [NSString stringWithFormat:@"productIdentifier: %@, transactionIdentifier: %@, transactionDate: %@, orderNo:%@, modelVerifyCount:%ld, priceTagString: %@, md5: %@, isTransactionValidFromService: %@", self.productIdentifier, self.transactionIdentifier, dateString, self.orderNo, self.modelVerifyCount, self.priceTagString, self.md5, self.isTransactionValidFromService ? @"YES" : @"NO"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
@@ -32,6 +32,7 @@ NSUInteger const kBLPaymentTransactionModelVerifyWarningCount = 20; // 最多验
         _modelVerifyCount = [aDecoder decodeIntegerForKey:@"modelVerifyCount"];
         _priceTagString = [aDecoder decodeObjectForKey:@"priceTagString"];
         _md5 = [aDecoder decodeObjectForKey:@"md5"];
+        _isTransactionValidFromService = [aDecoder decodeBoolForKey:@"isTransactionValidFromService"];
     }
     return self;
 }
@@ -44,6 +45,7 @@ NSUInteger const kBLPaymentTransactionModelVerifyWarningCount = 20; // 最多验
     [aCoder encodeInteger:self.modelVerifyCount forKey:@"modelVerifyCount"];
     [aCoder encodeObject:self.priceTagString forKey:@"priceTagString"];
     [aCoder encodeObject:self.md5 forKey:@"md5"];
+    [aCoder encodeBool:self.isTransactionValidFromService forKey:@"isTransactionValidFromService"];
 }
 
 - (instancetype)initWithProductIdentifier:(NSString *)productIdentifier
@@ -70,6 +72,7 @@ NSUInteger const kBLPaymentTransactionModelVerifyWarningCount = 20; // 最多验
         _transactionIdentifier = transactionIdentifier;
         _transactionDate = transactionDate;
         _modelVerifyCount = 0;
+        _isTransactionValidFromService = NO;
     }
     return self;
 }
