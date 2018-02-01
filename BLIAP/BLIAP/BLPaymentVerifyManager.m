@@ -128,7 +128,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     // 所有还未得到验证的交易(持久化的).
     NSArray<BLPaymentTransactionModel *> *transationModels = [self.keychainStore bl_fetchAllPaymentTransactionModelsSortedArrayUsingComparator:^NSComparisonResult(BLPaymentTransactionModel * obj1, BLPaymentTransactionModel *obj2) {
         
-        return [obj1.transactionDate compare:obj2.transactionDate] == NSOrderedAscending; // 日期升序排序.
+        return [obj1.transactionDate compare:obj2.transactionDate]; // 日期升序排序.
         
     } forUser:self.userid error:nil];
     
@@ -506,7 +506,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     // 验证次数少的排前面.
     [transactionModelsRetry sortUsingComparator:^NSComparisonResult(BLPaymentTransactionModel * obj1, BLPaymentTransactionModel * obj2) {
        
-        return obj1.modelVerifyCount < obj2.modelVerifyCount;
+        return obj1.modelVerifyCount > obj2.modelVerifyCount ? NSOrderedAscending : NSOrderedDescending;
         
     }];
     
