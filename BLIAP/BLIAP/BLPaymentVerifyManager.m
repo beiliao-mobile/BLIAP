@@ -93,6 +93,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     }
     
     self.transactionReceiptData = transactionReceiptData;
+    [self resetAllIfNeed];
 }
 
 - (void)appendPaymentTransactionModel:(BLPaymentTransactionModel *)transactionModel {
