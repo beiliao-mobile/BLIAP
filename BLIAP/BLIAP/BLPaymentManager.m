@@ -16,7 +16,7 @@
 #import "BLWalletCompat.h"
 #import "BLJailbreakDetectTool.h"
 
-@interface BLPaymentManager()<SKPaymentTransactionObserver, SKProductsRequestDelegate, BLPaymentVerifyManagerDelegate>
+@interface BLPaymentManager()<SKPaymentTransactionObserver, SKProductsRequestDelegate, BLPaymentVerifyManagerDelegate, SKRequestDelegate>
 
 /**
  * 获取完成以后的回调(注意循环引用).
@@ -286,6 +286,13 @@ static BLPaymentManager *_sharedManager = nil;
 }
 
 
+#pragma mark - SKRequestDelegate
+
+- (void)requestDidFinish:(SKRequest *)request {
+    [self refreshTransactionReceiptDataIfNeed];
+}
+
+
 #pragma mark - Notification
 
 - (void)addNotificationObserver {
@@ -368,7 +375,13 @@ static BLPaymentManager *_sharedManager = nil;
 
 - (NSData *)fetchTransactionReceiptDataInCurrentDevice {
     NSURL *appStoreReceiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
-    return [NSData dataWithContentsOfURL:appStoreReceiptURL];
+    NSData *data = [NSData dataWithContentsOfURL:appStoreReceiptURL];
+    if(!data){
+        SKReceiptRefreshRequest *request = [[SKReceiptRefreshRequest alloc] init];
+        request.delegate = self;
+        [request start];
+    }
+    return data;
 }
 
 - (NSString *)dumpATransaction:(SKPaymentTransaction *)transaction {
