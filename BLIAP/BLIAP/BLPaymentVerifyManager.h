@@ -64,6 +64,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, readonly) NSString *userid;
 
 /**
+ * 持久化到 keychain 的交易.
+ */
+@property (nonatomic, strong, nullable, readonly) NSArray<BLPaymentTransactionModel *> *transactionModelsInKeychain;
+
+/**
  * 初始化方法.
  */
 - (instancetype)initWithUserID:(NSString *)userid NS_DESIGNATED_INITIALIZER;

@@ -377,9 +377,11 @@ static BLPaymentManager *_sharedManager = nil;
     NSURL *appStoreReceiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
     NSData *data = [NSData dataWithContentsOfURL:appStoreReceiptURL];
     if(!data){
-        SKReceiptRefreshRequest *request = [[SKReceiptRefreshRequest alloc] init];
-        request.delegate = self;
-        [request start];
+        if(self.verifyManager.transactionModelsInKeychain.count){
+            SKReceiptRefreshRequest *request = [[SKReceiptRefreshRequest alloc] init];
+            request.delegate = self;
+            [request start];
+        }
     }
     return data;
 }
