@@ -182,6 +182,11 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     return NO;
 }
 
+- (NSArray<BLPaymentTransactionModel *> *)transactionModelsInKeychain {
+    return [self.keychainStore bl_fetchAllPaymentTransactionModelsForUser:self.userid
+                                                                    error:nil];
+}
+
 
 #pragma mark - BLPaymentVerifyTaskDelegate
 
