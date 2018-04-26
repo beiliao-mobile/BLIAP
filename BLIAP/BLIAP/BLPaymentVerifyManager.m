@@ -405,7 +405,7 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     }
     
     // 网络检查, 避免没有网络的情况下页一直发送验证请求.
-    AFNetworkReachabilityStatus networkReachabilityStatus = AFNetworkReachabilityManager.sharedManager.networkReachabilityStatus;
+    AFNetworkReachabilityStatus networkReachabilityStatus = self.networkReachabilityManager.networkReachabilityStatus;
     BOOL isNetworkEnable = networkReachabilityStatus == AFNetworkReachabilityStatusReachableViaWWAN || networkReachabilityStatus ==  AFNetworkReachabilityStatusReachableViaWiFi;
     if (!isNetworkEnable) {
         return;

@@ -55,15 +55,18 @@ static NSString *const kBLWalletModelsKeyChainStore = @"com.wallet.models.keycha
     NSMutableArray<BLPaymentTransactionModel *> *modelsExisted = [self bl_fetchAllPaymentTransactionModelsForUser:userid error:nil].mutableCopy;
     if (modelsExisted.count) {
         // 检查一下 keychain 中是否已经存在当前 model.
+        NSMutableArray *modelsNeedToRemoveExisted = [@[] mutableCopy];
         for (BLPaymentTransactionModel *modelExisted in modelsExisted) {
             for (BLPaymentTransactionModel *model in models) {
                 if ([modelExisted isEqual:model]) {
-                    [modelsExisted removeObject:modelExisted];
+                    [modelsNeedToRemoveExisted addObject:modelExisted];
                     NSLog(@"keychain 中已经有: %@, 不用再存一遍.", model);
                 }
             }
         }
-        
+        if (modelsNeedToRemoveExisted.count) {
+            [modelsExisted removeObjectsInArray:modelsNeedToRemoveExisted];
+        }
         if (modelsExisted.count) {
             NSMutableArray<NSData *> *modelsExistedDataM = [self internalEncodeModels:modelsExisted];
             [modelsDataSetM addObjectsFromArray:modelsExistedDataM];
