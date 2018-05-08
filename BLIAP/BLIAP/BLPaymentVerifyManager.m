@@ -454,35 +454,35 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
     
     NSError *error = nil;
     // 所有还未得到验证的交易(持久化的).
-    NSArray<BLPaymentTransactionModel *> *transationModels = [self.keychainStore bl_fetchAllPaymentTransactionModelsForUser:self.userid error:&error];
+    NSArray<BLPaymentTransactionModel *> *transactionModels = [self.keychainStore bl_fetchAllPaymentTransactionModelsForUser:self.userid error:&error];
     if (error) {
         NSLog(@"%@", error);
         return;
     }
     
-    NSMutableArray<BLPaymentTransactionModel *> *transationModelsM = [transationModels mutableCopy];
+    NSMutableArray<BLPaymentTransactionModel *> *transactionModelsM = [transactionModels mutableCopy];
     // 剔除已经验证完成的交易.
-    NSMutableArray<NSNumber *> *indexM = [NSMutableArray array];
-    for (BLPaymentTransactionModel *model in transationModels) {
+    NSMutableArray<BLPaymentTransactionModel *> *validTransactions = [NSMutableArray array];
+    for (BLPaymentTransactionModel *model in transactionModels) {
         if (model.isTransactionValidFromService) {
-            [indexM addObject:@([transationModels indexOfObject:model])];
+            [validTransactions addObject:model];
         }
     }
-    if (indexM.count) {
-        for (NSNumber *index in indexM) {
-            [transationModelsM removeObjectAtIndex:index.integerValue];
+    if (validTransactions.count) {
+        for (BLPaymentTransactionModel *model in validTransactions) {
+            [transactionModelsM removeObject:model];
         }
     }
-    if (!transationModelsM.count) {
+    if (!transactionModelsM.count) {
         return;
     }
     
     // 动态规划当前应该验证哪一笔订单.
-    NSArray<BLPaymentTransactionModel *> *transationModelsVerifyNow = [self dynamicPlanNeedVerifyModelsWithAllModels:transationModelsM];
+    NSArray<BLPaymentTransactionModel *> *transactionModelsVerifyNow = [self dynamicPlanNeedVerifyModelsWithAllModels:transactionModelsM];
     
     NSParameterAssert(self.transactionReceiptData.length);
-    NSMutableArray<BLPaymentVerifyTask *> *tasksM = [NSMutableArray arrayWithCapacity:transationModelsVerifyNow.count];
-    for (BLPaymentTransactionModel *model in transationModelsVerifyNow) {
+    NSMutableArray<BLPaymentVerifyTask *> *tasksM = [NSMutableArray arrayWithCapacity:transactionModelsVerifyNow.count];
+    for (BLPaymentTransactionModel *model in transactionModelsVerifyNow) {
         BLPaymentVerifyTask *task = [[BLPaymentVerifyTask alloc] initWithPaymentTransactionModel:model transactionReceiptData:self.transactionReceiptData];
         task.delegate = self;
         [tasksM addObject:task];
