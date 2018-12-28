@@ -289,7 +289,12 @@ static BLPaymentManager *_sharedManager = nil;
 #pragma mark - SKRequestDelegate
 
 - (void)requestDidFinish:(SKRequest *)request {
-    [self refreshTransactionReceiptDataIfNeed];
+    /**
+        这里会引发多线程bug;
+        解释：当用户在一笔订单还未验证结束时，此时又购买另外一笔，会改变当前BLPaymentVerifyManager的currentTask，
+        因此会出现数据竞争现象，注释掉即可解决。
+    */
+    // [self refreshTransactionReceiptDataIfNeed];
 }
 
 
