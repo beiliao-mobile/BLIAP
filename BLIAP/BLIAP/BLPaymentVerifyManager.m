@@ -140,9 +140,12 @@ NSString *const kBLPaymentVerifyManagerKeychainStoreServiceKey = @"com.ibeiliao.
 }
 
 - (void)cancelAllTasks {
-    if (self.currentVerifingTask) {
-        [self.currentVerifingTask cancel];
-    }
+    // @reference: issue: #8
+    // 取消task后，该task并没有从任务队列中消除，下次还会动态队列排序时，排到他。
+    // 并且感觉取消这个状态并没有意义。一个队列，依次处理订单验证任务，失败超过一定次数，通知异常finish就行啦
+    // if (self.currentVerifingTask) {
+    //     [self.currentVerifingTask cancel];
+    // }
     
     self.operationTaskQueue = nil;
 }
